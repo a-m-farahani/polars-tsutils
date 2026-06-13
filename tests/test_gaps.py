@@ -1,4 +1,4 @@
-from polars_tsutils.gaps import detect_gaps
+from polars_tsutils.gaps import detect_gaps, flag_gaps, coverage
 
 from datetime import datetime
 import polars as pl
@@ -36,3 +36,38 @@ class TestDetectGaps:
         gaps_loose = detect_gaps(df_with_gap, "ts", "5m", threshold=1.5)
         assert gaps_loose.height == 1
 
+
+class TestFlagGaps:
+    def test_no_flags_on_regular_series(self, regular_df):
+        result = flag_gaps(regular_df, "ts", "5m")
+        assert result["gap_after"].sum() == 0
+
+    def test_flags_row_before_gap(self, df_with_gap):
+        result = flag_gaps(df_with_gap, "ts", "5m")
+        # Row at index 5 (00:25) is immediately before the gap
+        flagged = result.filter(pl.col("gap_after"))
+        assert flagged.height == 1
+        assert flagged["ts"][0] == datetime(2024, 1, 1, 0, 25)
+
+    def test_custom_col_name(self, df_with_gap):
+        result = flag_gaps(df_with_gap, "ts", "5m", col_name="has_gap")
+        assert "has_gap" in result.columns
+
+    def test_last_row_never_flagged(self, df_with_gap):
+        result = flag_gaps(df_with_gap, "ts", "5m")
+        assert result["gap_after"][-1] == False
+
+
+class TestCoverage:
+    def test_perfect_coverage(self, regular_df):
+        assert coverage(regular_df, "ts", "5m") == pytest.approx(1.0)
+
+    def test_coverage_with_gap(self, df_with_gap):
+        cov = coverage(df_with_gap, "ts", "5m")
+        # 10 rows present, 12 expected over the 55-min span (0..55 in 5-min steps = 12)
+        # 00:00 to 01:00 with gap: expected = 13 timestamps, actual = 10
+        assert 0.0 < cov < 1.0
+
+    def test_single_row_coverage(self):
+        df = pl.DataFrame({"ts": [datetime(2024, 1, 1)], "v": [1.0]})
+        assert coverage(df, "ts", "5m") == pytest.approx(1.0)
