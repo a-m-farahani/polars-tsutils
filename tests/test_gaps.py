@@ -47,7 +47,7 @@ class TestFlagGaps:
         # Row at index 5 (00:25) is immediately before the gap
         flagged = result.filter(pl.col("gap_after"))
         assert flagged.height == 1
-        assert flagged["ts"][0] == datetime(2024, 1, 1, 0, 25)
+        assert flagged["ts"][0] == datetime(2026, 1, 1, 0, 25)
 
     def test_custom_col_name(self, df_with_gap):
         result = flag_gaps(df_with_gap, "ts", "5m", col_name="has_gap")
@@ -69,5 +69,5 @@ class TestCoverage:
         assert 0.0 < cov < 1.0
 
     def test_single_row_coverage(self):
-        df = pl.DataFrame({"ts": [datetime(2024, 1, 1)], "v": [1.0]})
+        df = pl.DataFrame({"ts": [datetime(2026, 1, 1)], "v": [1.0]})
         assert coverage(df, "ts", "5m") == pytest.approx(1.0)

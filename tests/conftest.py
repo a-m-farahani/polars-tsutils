@@ -11,7 +11,7 @@ def make_ts(start: str, n: int, freq_minutes: int = 5) -> list[datetime]:
 @pytest.fixture
 def regular_df():
     """Regular 5-minute series, no gaps."""
-    ts = make_ts("2024-01-01 00:00", 12)  # 1 hour
+    ts = make_ts("2026-01-01 00:00", 12)  # 1 hour
     return pl.DataFrame({
         "ts": ts,
         "power": [100.0, 110.0, 120.0, 130.0, 140.0, 150.0,
@@ -24,11 +24,11 @@ def regular_df():
 def irregular_df():
     """Irregular timestamps (not on 5-minute boundary)."""
     ts = [
-        datetime(2024, 1, 1, 0, 0),
-        datetime(2024, 1, 1, 0, 3),   # 3 min
-        datetime(2024, 1, 1, 0, 7),   # 4 min
-        datetime(2024, 1, 1, 0, 12),  # 5 min
-        datetime(2024, 1, 1, 0, 17),  # 5 min
+        datetime(2026, 1, 1, 0, 0),
+        datetime(2026, 1, 1, 0, 3),   # 3 min
+        datetime(2026, 1, 1, 0, 7),   # 4 min
+        datetime(2026, 1, 1, 0, 12),  # 5 min
+        datetime(2026, 1, 1, 0, 17),  # 5 min
     ]
     return pl.DataFrame({
         "ts": ts,
@@ -40,8 +40,8 @@ def irregular_df():
 def df_with_gap():
     """5-minute series with a 15-minute gap in the middle."""
     ts = (
-        make_ts("2024-01-01 00:00", 6)       # 00:00–00:25
-        + make_ts("2024-01-01 00:40", 4)     # skip 00:30–00:35, resume 00:40
+        make_ts("2026-01-01 00:00", 6)       # 00:00–00:25
+        + make_ts("2026-01-01 00:40", 4)     # skip 00:30–00:35, resume 00:40
     )
     return pl.DataFrame({
         "ts": ts,
