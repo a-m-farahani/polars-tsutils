@@ -47,3 +47,12 @@ def df_with_gap():
         "ts": ts,
         "power": list(range(10, 110, 10)),
     })
+
+
+@pytest.fixture
+def df_with_nulls():
+    ts = make_ts("2026-01-01 00:00", 8)
+    return pl.DataFrame({
+        "ts": ts,
+        "power": [100.0, None, None, 130.0, 140.0, None, 160.0, 170.0],
+    })
